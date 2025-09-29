@@ -11,7 +11,8 @@
     "dev:link": "npm link",
     "dev:unlink": "npm unlink -g @json-express/context-builder",
     "build": "vite build",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": ["cli", "tool", "context", "build", "context-builder", "context build", "ai"],
   "author": "vaz",

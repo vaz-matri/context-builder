@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] - wip
 
+### Added
+- made sure it's built before publishing
+
 ### Fixed
 - logo broken in npm page
 
