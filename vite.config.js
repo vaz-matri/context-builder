@@ -2,9 +2,10 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
     build: {
+        ssr: true,
         lib: {
             entry: './src/index.js',
-            formats: ['es'],
+            formats: ['es', 'cjs'],
             fileName: 'index'
         },
         rollupOptions: {
@@ -15,5 +16,8 @@ export default defineConfig({
         target: 'node18',
         outDir: 'dist',
         emptyOutDir: true
+    },
+    ssr: {
+        noExternal: ['ignore']
     }
 })
