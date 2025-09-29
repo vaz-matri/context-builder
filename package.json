@@ -1,0 +1,21 @@
+{
+  "name": "@json-express/context-builder",
+  "version": "0.1.0-alpha",
+  "type": "module",
+  "description": "A cli tool to build your project context that can be uploaded to ai when chatting",
+  "bin": {
+    "context-builder": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "vite-node src/index.js",
+    "build": "vite build",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["cli", "tool", "context", "build", "context-builder", "context build", "ai"],
+  "author": "vaz",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^7.1.7",
+    "vite-node": "^3.2.4"
+  }
+}
