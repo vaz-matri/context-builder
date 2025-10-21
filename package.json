@@ -1,6 +1,6 @@
 {
   "name": "@json-express/context-builder",
-  "version": "0.1.2-alpha",
+  "version": "0.1.2",
   "type": "module",
   "description": "A cli tool to build your project context that can be uploaded to ai when chatting",
   "bin": {
