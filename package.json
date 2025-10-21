@@ -1,6 +1,6 @@
 {
   "name": "@json-express/context-builder",
-  "version": "0.1.2",
+  "version": "0.1.2-alpha.1",
   "type": "module",
   "description": "A cli tool to build your project context that can be uploaded to ai when chatting",
   "bin": {
@@ -30,5 +30,12 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vaz-matri/context-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vaz-matri/context-builder/issues"
   }
 }
