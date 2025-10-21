@@ -1,6 +1,6 @@
 {
   "name": "@json-express/context-builder",
-  "version": "0.1.2-alpha.1",
+  "version": "0.1.2-alpha.2",
   "type": "module",
   "description": "A cli tool to build your project context that can be uploaded to ai when chatting",
   "bin": {
@@ -25,6 +25,7 @@
     "vite-node": "^3.2.4"
   },
   "files": [
+    "logo",
     "dist"
   ],
   "publishConfig": {
