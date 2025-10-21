@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added `ReadMe.md`
 - added `DeveloperGuide.md`
 
-## [0.1.2] - wip
+## [0.1.2] - 2025-10-21
 
 ### Added
 - made sure it's built before publishing
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - logo broken in npm page
 
-## [0.1.1] - wip
+## [0.1.1] - 2025-10-01
 
 ### Updated
 - publish only dist to reduce npm package size
