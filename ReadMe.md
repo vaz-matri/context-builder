@@ -25,6 +25,29 @@ context-builder
 
 The tool will process your codebase and generate the context file (`project-context.txt`) that you can upload to your AI assistant.
 
+## Ignoring Files
+
+By default, CONTEXT Builder automatically respects your `.gitignore` file. Any files or folders ignored by Git will not be included in the generated context.
+
+### Using `.contextignore`
+
+Sometimes, you might want to keep certain files in your Git repository but exclude them from the AI context (for example: large documentation files, lock files, or asset metadata that might consume too many tokens).
+
+You can create a `.contextignore` file in your root directory. This file uses the **same pattern syntax as `.gitignore`**.
+
+**Example `.contextignore`:**
+```text
+# Exclude heavy documentation
+/docs/legacy-manuals/
+
+# Exclude specific files
+package-lock.json
+pnpm-lock.yaml
+
+# Exclude all .svg files from context
+**/*.svg
+```
+
 ## Uninstallation
 
 To remove CONTEXT Builder from your system:
