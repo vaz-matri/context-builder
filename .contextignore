@@ -1,0 +1,9 @@
+# lock files
+pnpm-lock.yaml
+
+# assets
+*.svg
+
+# md files
+LICENSE
+*.md

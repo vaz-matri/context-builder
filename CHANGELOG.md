@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 - output content context improved
 
-## [0.1.4] - wip
+## [0.1.4] - 2025-12-19
 
 ### Added
 - added `.contextignore` to ignore files and folders
@@ -23,13 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 - Updated ReadMe with context ignore
 
-## [0.1.3] - wip
+## [0.1.3] - 2025-10-29
 
 ### Added
 - added `ReadMe.md`
 - added `DeveloperGuide.md`
 
-## [0.1.2] - wip
+## [0.1.2] - 2025-10-21
 
 ### Added
 - made sure it's built before publishing
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - logo broken in npm page
 
-## [0.1.1] - wip
+## [0.1.1] - 2025-10-01
 
 ### Updated
 - publish only dist to reduce npm package size
