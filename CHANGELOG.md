@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support `--name`, `-n` filename cli option (defaults to `llm-context.md`)
 - Support `--format`, `-f` format cli option (`md`, `txt`, `json` - defaults to `md`)
 - Support `--compress`, `-c` flag to optimize generated token count by aggressively stripping comments and excess whitespace
+- Support `--copy` flag to completely bypass file generation and load the parsed codebase directly into your clipboard natively via `clipboardy` (Note: clipboard copying now happens by default alongside file generation)
 - Support `--version`, `-v` flag
 - Added descriptive AI prompt mapping out codebase context, tool version, and omitted files info
 

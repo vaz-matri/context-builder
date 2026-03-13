@@ -37,6 +37,7 @@ context-builder src views components
 - `-n, --name <filename>`: Specify the output filename (defaults to `llm-context.md`)
 - `-f, --format <format>`: Specify the output file format (`md`, `txt`, `json` - defaults to `md`)
 - `-c, --compress`: Compress output to save LLM tokens by removing whitespace and comments
+- `--copy`: **[NEW]** Skip generating the file and only copy the context string to your clipboard (Note: Without this flag, generating the file will *also* copy the content natively)
 - `-v, --version`: Output the current version
 - `-h, --help`: Display help for command
 
@@ -44,6 +45,11 @@ context-builder src views components
 
 ```bash
 context-builder src -o dist -n my-context.txt -f txt -c
+```
+**Example:** Build context from the `views` folder and ONLY copy it to the clipboard (no file output):
+
+```bash
+context-builder views --copy
 ```
 
 The tool will process your codebase and generate the context file that you can upload to your AI assistant.
