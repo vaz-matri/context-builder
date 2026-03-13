@@ -5,15 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.5] - wip
+## [0.1.5] - 2026-03-14
 
 ### Added
-- start directory cli option
-- output directory cli option
-- output filename cli option
+- CLI arg parsing via Commander
+- Support for positional directories e.g. `context-builder src views`
+- Support `--out`, `-o` directory cli option (defaults to `.`)
+- Support `--name`, `-n` filename cli option (defaults to `project-context.txt`)
+- Support `--version`, `-v` flag
+- Added descriptive AI prompt mapping out codebase context, tool version, and omitted files info
 
 ### Updated
-- output content context improved
+- context-ignored files no longer appear in the detailed output section (only the tree structure)
+- Optimized output content and improved AI context
+- Updated keywords payload in `package.json`
 
 ## [0.1.4] - 2025-12-19
 

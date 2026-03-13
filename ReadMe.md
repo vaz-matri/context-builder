@@ -16,14 +16,35 @@ pnpm i -g @json-express/context-builder
 
 ## Usage
 
-Navigate to your project directory and run the tool:
+Navigate to your project directory and run the tool. By default, it will process the current directory and output to `project-context.txt`.
 
 ```bash
 cd project-dir
 context-builder
 ```
 
-The tool will process your codebase and generate the context file (`project-context.txt`) that you can upload to your AI assistant.
+### Specifying Directories
+
+You can specify one or more directories to include in the context by passing them as arguments:
+
+```bash
+context-builder src views components
+```
+
+### Options
+
+- `-o, --out <directory>`: Specify the output directory (defaults to current folder `.`)
+- `-n, --name <filename>`: Specify the output filename (defaults to `project-context.txt`)
+- `-v, --version`: Output the current version
+- `-h, --help`: Display help for command
+
+**Example:** Generate context from the `src` folder and save it to `dist/my-context.txt`:
+
+```bash
+context-builder src -o dist -n my-context.txt
+```
+
+The tool will process your codebase and generate the context file that you can upload to your AI assistant.
 
 ## Ignoring Files
 
