@@ -36,13 +36,14 @@ context-builder src views components
 - `-o, --out <directory>`: Specify the output directory (defaults to current folder `.`)
 - `-n, --name <filename>`: Specify the output filename (defaults to `llm-context.md`)
 - `-f, --format <format>`: Specify the output file format (`md`, `txt`, `json` - defaults to `md`)
+- `-c, --compress`: Compress output to save LLM tokens by removing whitespace and comments
 - `-v, --version`: Output the current version
 - `-h, --help`: Display help for command
 
-**Example:** Generate a `.txt` context from the `src` folder and save it to `dist/my-context.txt`:
+**Example:** Generate a `.txt` context from the `src` folder, compress it, and save it to `dist/my-context.txt`:
 
 ```bash
-context-builder src -o dist -n my-context.txt -f txt
+context-builder src -o dist -n my-context.txt -f txt -c
 ```
 
 The tool will process your codebase and generate the context file that you can upload to your AI assistant.

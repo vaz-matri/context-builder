@@ -28,6 +28,7 @@ program
     .option('-o, --out <directory>', 'Output directory', '.')
     .option('-n, --name <filename>', 'Output filename (default dynamic based on format)')
     .option('-f, --format <format>', 'Output format (md, txt, json)', 'md')
+    .option('-c, --compress', 'Compress output to save LLM tokens by removing whitespace and comments', false)
     .action((directories, options) => {
         const startDirs = directories.length > 0 ? directories : ['.']
         
@@ -45,6 +46,7 @@ program
 
         const outName = options.name || `llm-context.${format}`
         const outputFilePath = path.join(outDir, outName)
+        const isCompress = options.compress
 
         // Ensure output directory exists
         if (!fs.existsSync(outDir)) {
@@ -129,6 +131,36 @@ If you need to see the contents of any files listed in the tree that are omitted
             return tree
         }
 
+        const compressContent = (content, ext) => {
+            if (!isCompress) return content;
+
+            let compressed = content;
+
+            const cLikeExtensions = ['js', 'jsx', 'ts', 'tsx', 'java', 'c', 'cpp', 'cs', 'go', 'php', 'swift', 'kt'];
+            const hashExtensions = ['py', 'rb', 'yaml', 'yml', 'sh', 'pl', 'r'];
+            const htmlExtensions = ['html', 'xml', 'vue', 'svelte', 'svg'];
+
+            if (cLikeExtensions.includes(ext)) {
+                // Remove multi-line comments: /* ... */ 
+                // Using [\s\S]*? to match across newlines lazily
+                compressed = compressed.replace(/\/\*[\s\S]*?\*\//g, '');
+                // Remove single-line comments: // ... it's unsafe to blindly remove // inside strings so we do a simple regex that requires it to be at start of line or preceded by whitespace
+                compressed = compressed.replace(/(^\s*|\s+)\/\/.*$/gm, '');
+            } else if (hashExtensions.includes(ext)) {
+                // Remove Python/Ruby style comments #
+                compressed = compressed.replace(/(^\s*|\s+)#.*$/gm, '');
+            } else if (htmlExtensions.includes(ext)) {
+                // Remove HTML comments <!-- -->
+                compressed = compressed.replace(/<!--[\s\S]*?-->/g, '');
+            }
+
+            // Remove excessive blank lines for all files
+            compressed = compressed.replace(/\n\s*\n/g, '\n');
+            
+            // Trim leading/trailing whitespace
+            return compressed.trim();
+        }
+
         const readDirectoryAndWriteToFile = (directoryPath) => {
             if (!fs.existsSync(directoryPath)) return
             
@@ -150,7 +182,9 @@ If you need to see the contents of any files listed in the tree that are omitted
                     if (contextIg.ignores(normalizedPath)) {
                         return
                     } else {
-                        const content = fs.readFileSync(filePath, 'utf8')
+                        const rawContent = fs.readFileSync(filePath, 'utf8')
+                        const ext = path.extname(normalizedPath).slice(1) || 'text'
+                        const content = compressContent(rawContent, ext)
                         
                         if (format === 'json') {
                             jsonOutput.files.push({
@@ -158,7 +192,6 @@ If you need to see the contents of any files listed in the tree that are omitted
                                 content: content
                             })
                         } else if (format === 'md') {
-                            const ext = path.extname(normalizedPath).slice(1) || 'text'
                             const outputContent = `### ${normalizedPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
                             fs.appendFileSync(outputFilePath, outputContent)
                         } else {
