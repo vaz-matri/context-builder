@@ -5,11 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.5] - 2026-03-14
+## [0.2.0] - Upcoming
 
 ### Added
-- CLI arg parsing via Commander
-- Support for positional directories e.g. `context-builder src views`
+- Created the ability to supply multiple root folders to scan (e.g. `npx context-builder src views`).
 - Support `--out`, `-o` directory cli option (defaults to `.`)
 - Support `--name`, `-n` filename cli option (defaults to `llm-context.md`)
 - Support `--format`, `-f` format cli option (`md`, `txt`, `json` - defaults to `md`)
