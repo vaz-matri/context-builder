@@ -26,7 +26,8 @@ program
     .version(VERSION, '-v, --version', 'output the current version')
     .argument('[directories...]', 'Directories to include in the context. Defaults to current directory if none specified.')
     .option('-o, --out <directory>', 'Output directory', '.')
-    .option('-n, --name <filename>', 'Output filename', 'project-context.txt')
+    .option('-n, --name <filename>', 'Output filename (default dynamic based on format)')
+    .option('-f, --format <format>', 'Output format (md, txt, json)', 'md')
     .action((directories, options) => {
         const startDirs = directories.length > 0 ? directories : ['.']
         
@@ -36,7 +37,14 @@ program
             outDir = outDir.slice(2)
         }
         
-        const outputFilePath = path.join(outDir, options.name)
+        const format = options.format.toLowerCase()
+        if (!['md', 'txt', 'json'].includes(format)) {
+            console.error('Invalid format specified. Must be md, txt, or json.')
+            process.exit(1)
+        }
+
+        const outName = options.name || `llm-context.${format}`
+        const outputFilePath = path.join(outDir, outName)
 
         // Ensure output directory exists
         if (!fs.existsSync(outDir)) {
@@ -48,7 +56,6 @@ program
         // 1. gitIg: For full exclusion from tree and content
         const gitIg = ignore()
 
-        // Add default and .gitignore rules
         const gitignorePath = '.gitignore'
         if (fs.existsSync(gitignorePath)) {
             const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8')
@@ -56,7 +63,7 @@ program
         }
         gitIg.add('node_modules')
         // Automatically ignore the output file so it doesn't try to read itself
-        gitIg.add(options.name) 
+        gitIg.add(outName) 
         gitIg.add('.git')
 
         // 2. contextIg: For content-only exclusion
@@ -84,13 +91,23 @@ If you need to see the contents of any files listed in the tree that are omitted
 
 ================================================================================
 `
-        fs.appendFileSync(outputFilePath, aiPrompt + '\n')
+        
+        // Data structure for JSON format
+        const jsonOutput = {
+            tool: TOOL_NAME,
+            version: VERSION,
+            trees: [],
+            files: []
+        }
+
+        if (format === 'md' || format === 'txt') {
+            fs.appendFileSync(outputFilePath, aiPrompt + '\n')
+        }
 
         const generateTree = (dir, prefix = '') => {
             if (!fs.existsSync(dir)) return ''
             
             const allFiles = fs.readdirSync(dir)
-            // The tree is only affected by .gitignore rules
             const allowedFiles = allFiles.filter(file => !gitIg.ignores(path.join(dir, file).replace(/^\.\//, '')))
 
             let tree = ''
@@ -121,7 +138,6 @@ If you need to see the contents of any files listed in the tree that are omitted
                 const filePath = path.join(directoryPath, file)
                 const normalizedPath = filePath.replace(/^\.\//, '')
 
-                // First, check for full exclusion from .gitignore
                 if (gitIg.ignores(normalizedPath)) {
                     return
                 }
@@ -131,15 +147,25 @@ If you need to see the contents of any files listed in the tree that are omitted
                 if (stat.isDirectory()) {
                     readDirectoryAndWriteToFile(filePath)
                 } else if (stat.isFile()) {
-                    // Next, check for content-only exclusion from .contextignore
                     if (contextIg.ignores(normalizedPath)) {
-                        // Do NOT print anything for context-ignored files
                         return
                     } else {
-                        // Otherwise, list the path and the content
                         const content = fs.readFileSync(filePath, 'utf8')
-                        const outputContent = `${normalizedPath}\n\`\`\`\n${content}\n\`\`\`\n\n`
-                        fs.appendFileSync(outputFilePath, outputContent)
+                        
+                        if (format === 'json') {
+                            jsonOutput.files.push({
+                                path: normalizedPath,
+                                content: content
+                            })
+                        } else if (format === 'md') {
+                            const ext = path.extname(normalizedPath).slice(1) || 'text'
+                            const outputContent = `### ${normalizedPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
+                            fs.appendFileSync(outputFilePath, outputContent)
+                        } else {
+                            // Plain text formatting
+                            const outputContent = `${normalizedPath}\n----------------------------------------\n${content}\n\n========================================\n\n`
+                            fs.appendFileSync(outputFilePath, outputContent)
+                        }
                     }
                 }
             })
@@ -152,15 +178,30 @@ If you need to see the contents of any files listed in the tree that are omitted
         startDirs.forEach(dir => {
             console.log(`Processing directory: ${dir}`)
             
-            // 1. Generate and write the tree structure (respects .gitignore)
             const treeStructure = generateTree(dir)
             const rootName = dir === '.' ? path.basename(process.cwd()) : path.basename(dir)
             
-            fs.appendFileSync(outputFilePath, rootName + '\n' + treeStructure + '\n\n')
-
-            // 2. Read and write file content (respects both .gitignore and .contextignore)
-            readDirectoryAndWriteToFile(dir)
+            if (format === 'json') {
+                jsonOutput.trees.push({
+                    directory: rootName,
+                    tree: treeStructure
+                })
+            } else if (format === 'md') {
+                fs.appendFileSync(outputFilePath, `## Project Tree: ${rootName}\n\`\`\`text\n${rootName}\n${treeStructure}\n\`\`\`\n\n`)
+                // Write directory files
+                readDirectoryAndWriteToFile(dir)
+            } else {
+                fs.appendFileSync(outputFilePath, `Project Tree: ${rootName}\n${treeStructure}\n\n`)
+                // Write directory files
+                readDirectoryAndWriteToFile(dir)
+            }
         })
+
+        if (format === 'json') {
+            // Write JSON structure
+            startDirs.forEach(dir => readDirectoryAndWriteToFile(dir))
+            fs.writeFileSync(outputFilePath, JSON.stringify(jsonOutput, null, 2))
+        }
 
         console.log(`Processing complete. The output has been written to ${outputFilePath}`)
     })

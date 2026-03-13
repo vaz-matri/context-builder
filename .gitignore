@@ -11,5 +11,5 @@ dist/
 plan.txt
 
 # context-builder
-project-context.txt
+llm-context.*
 context.md

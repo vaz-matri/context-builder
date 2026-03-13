@@ -16,7 +16,7 @@ pnpm i -g @json-express/context-builder
 
 ## Usage
 
-Navigate to your project directory and run the tool. By default, it will process the current directory and output to `project-context.txt`.
+Navigate to your project directory and run the tool. By default, it will process the current directory and output to `llm-context.md`.
 
 ```bash
 cd project-dir
@@ -34,14 +34,15 @@ context-builder src views components
 ### Options
 
 - `-o, --out <directory>`: Specify the output directory (defaults to current folder `.`)
-- `-n, --name <filename>`: Specify the output filename (defaults to `project-context.txt`)
+- `-n, --name <filename>`: Specify the output filename (defaults to `llm-context.md`)
+- `-f, --format <format>`: Specify the output file format (`md`, `txt`, `json` - defaults to `md`)
 - `-v, --version`: Output the current version
 - `-h, --help`: Display help for command
 
-**Example:** Generate context from the `src` folder and save it to `dist/my-context.txt`:
+**Example:** Generate a `.txt` context from the `src` folder and save it to `dist/my-context.txt`:
 
 ```bash
-context-builder src -o dist -n my-context.txt
+context-builder src -o dist -n my-context.txt -f txt
 ```
 
 The tool will process your codebase and generate the context file that you can upload to your AI assistant.
