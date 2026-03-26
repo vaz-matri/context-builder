@@ -24,14 +24,14 @@ program
     .name('context-builder')
     .description('A cli tool to build your project context that can be uploaded to ai when chatting')
     .version(VERSION, '-v, --version', 'output the current version')
-    .argument('[directories...]', 'Directories to include in the context. Defaults to current directory if none specified.')
+    .argument('[paths...]', 'Paths (directories or files) to include in the context. Defaults to current directory if none specified.')
     .option('-o, --out <directory>', 'Output directory', '.')
     .option('-n, --name <filename>', 'Output filename (default dynamic based on format)')
     .option('-f, --format <format>', 'Output format (md, txt, json)', 'md')
     .option('-c, --compress', 'Compress output to save LLM tokens by removing whitespace and comments', false)
     .option('--copy', 'Skip creating a file and only copy the context to clipboard', false)
-    .action(async (directories, options) => {
-        const startDirs = directories.length > 0 ? directories : ['.']
+    .action(async (paths, options) => {
+        const startPaths = paths.length > 0 ? paths : ['.']
 
         let outDir = options.out
         // Handle common UX mistake where user might input `./dist` instead of `dist`
@@ -106,6 +106,10 @@ If you need to see the contents of any files listed in the tree that are omitted
         const generateTree = (dir, prefix = '') => {
             if (!fs.existsSync(dir)) return ''
 
+            if (fs.statSync(dir).isFile()) {
+                return ''
+            }
+
             const allFiles = fs.readdirSync(dir)
             const allowedFiles = allFiles.filter(file => {
                 const absolutePath = path.resolve(dir, file)
@@ -164,52 +168,50 @@ If you need to see the contents of any files listed in the tree that are omitted
             return compressed.trim();
         }
 
-        const readDirectoryAndWriteToFile = (directoryPath) => {
-            if (!fs.existsSync(directoryPath)) return
+        const readPathAndWriteToFile = (itemPath) => {
+            if (!fs.existsSync(itemPath)) return
 
-            const files = fs.readdirSync(directoryPath)
+            const absolutePath = path.resolve(itemPath)
+            const relativePath = path.relative(process.cwd(), absolutePath)
+            // Fallback to basename if the file is strictly outside cwd scope (preventing crashes)
+            const relativeCheckPath = relativePath.startsWith('..') ? path.basename(itemPath) : relativePath
 
-            files.forEach(file => {
-                const filePath = path.join(directoryPath, file)
-                const absolutePath = path.resolve(filePath)
-                const relativePath = path.relative(process.cwd(), absolutePath)
-                // Fallback to basename if the file is strictly outside cwd scope (preventing crashes)
-                const relativeCheckPath = relativePath.startsWith('..') ? path.basename(filePath) : relativePath
+            if (gitIg.ignores(relativeCheckPath)) {
+                return
+            }
 
-                if (gitIg.ignores(relativeCheckPath)) {
+            const stat = fs.statSync(itemPath)
+
+            if (stat.isDirectory()) {
+                const files = fs.readdirSync(itemPath)
+                files.forEach(file => {
+                    readPathAndWriteToFile(path.join(itemPath, file))
+                })
+            } else if (stat.isFile()) {
+                if (contextIg.ignores(relativeCheckPath)) {
                     return
-                }
+                } else {
+                    const rawContent = fs.readFileSync(itemPath, 'utf8')
+                    // Use the relative path for the display string, but default to basename if it's completely out of bounds
+                    const displayPath = relativePath.startsWith('..') ? itemPath : relativePath
+                    const ext = path.extname(itemPath).slice(1) || 'text'
+                    const content = compressContent(rawContent, ext)
 
-                const stat = fs.statSync(filePath)
-
-                if (stat.isDirectory()) {
-                    readDirectoryAndWriteToFile(filePath)
-                } else if (stat.isFile()) {
-                    if (contextIg.ignores(relativeCheckPath)) {
-                        return
+                    if (format === 'json') {
+                        jsonOutput.files.push({
+                            path: displayPath,
+                            content: content
+                        })
+                    } else if (format === 'md') {
+                        const outputContent = `### ${displayPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
+                        finalOutputString += outputContent
                     } else {
-                        const rawContent = fs.readFileSync(filePath, 'utf8')
-                        // Use the relative path for the display string, but default to basename if it's completely out of bounds
-                        const displayPath = relativePath.startsWith('..') ? filePath : relativePath
-                        const ext = path.extname(filePath).slice(1) || 'text'
-                        const content = compressContent(rawContent, ext)
-
-                        if (format === 'json') {
-                            jsonOutput.files.push({
-                                path: displayPath,
-                                content: content
-                            })
-                        } else if (format === 'md') {
-                            const outputContent = `### ${displayPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
-                            finalOutputString += outputContent
-                        } else {
-                            // Plain text formatting
-                            const outputContent = `${displayPath}\n----------------------------------------\n${content}\n\n========================================\n\n`
-                            finalOutputString += outputContent
-                        }
+                        // Plain text formatting
+                        const outputContent = `${displayPath}\n----------------------------------------\n${content}\n\n========================================\n\n`
+                        finalOutputString += outputContent
                     }
                 }
-            })
+            }
         }
 
         // --- Execution ---
@@ -217,9 +219,9 @@ If you need to see the contents of any files listed in the tree that are omitted
         console.log('Generating file tree(s)...')
 
         // Step 1: Generate all file trees and output them first
-        startDirs.forEach(dir => {
-            const treeStructure = generateTree(dir)
-            const rootName = dir === '.' ? path.basename(process.cwd()) : path.basename(dir)
+        startPaths.forEach(p => {
+            const treeStructure = generateTree(p)
+            const rootName = p === '.' ? path.basename(process.cwd()) : path.basename(p)
 
             if (format === 'json') {
                 jsonOutput.trees.push({
@@ -236,9 +238,9 @@ If you need to see the contents of any files listed in the tree that are omitted
         console.log('Generating file contents...')
 
         // Step 2: Append all file contents below the generated trees
-        startDirs.forEach(dir => {
-            console.log(`Processing directory: ${dir}`)
-            readDirectoryAndWriteToFile(dir)
+        startPaths.forEach(p => {
+            console.log(`Processing path: ${p}`)
+            readPathAndWriteToFile(p)
         })
 
         // Step 3: Serialize JSON if needed
