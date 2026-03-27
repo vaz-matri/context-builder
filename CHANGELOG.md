@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed `TypeError: path must not be empty` crash when running `context-builder` or `context-builder .` (i.e. scanning the current directory). The `ignore` library throws on empty strings; when the scan root is the cwd itself, `path.relative()` returns `""` and the ignore check is now correctly skipped.
 
+### Updated
+- Refined the AI system prompt injected at the top of generated context files. Now uses structured markdown with explicit instructions for the LLM on data structure, exclusion rules, and how to handle missing file contents.
+
 ## [0.2.2] - 2026-03-26
 
 ### Added
