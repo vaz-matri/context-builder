@@ -87,7 +87,13 @@ pnpm-lock.yaml
 docs/legacy/
 ```
 
-> **Note**: Files ignored via `.contextignore` will still appear in the **Project Tree** (so the AI knows they exist), but their **content** will be omitted to save tokens.
+### Priority
+
+CONTEXT Builder follows a specific priority logic to decide what makes it into your context:
+
+1. **Explicit Arguments (Highest Priority)**: If you pass a specific file path as an argument (e.g., `context-builder config.json`), it will be included in the context even if it exists in a sub-folder that might otherwise be ignored.
+2. **`.contextignore`**: Files matching patterns here will appear in the **Project Tree** (so the AI knows the file exists), but their **content will be hidden** to save tokens.
+3. **`.gitignore`**: Files matching these patterns are completely excluded from both the tree and the content.
 
 ---
 
