@@ -114,17 +114,21 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
             finalOutputString += aiPrompt + '\n'
         }
 
-        const generateTree = (dir, prefix = '') => {
+        const generateTree = (dir, prefix = '', isExplicit = false) => {
             if (!fs.existsSync(dir)) return ''
 
-            if (fs.statSync(dir).isFile()) {
-                return ''
-            }
+            // If it's a file, we don't generate a tree for it (it's handled by readPathAndWriteToFile)
+            if (fs.statSync(dir).isFile()) return ''
 
             const allFiles = fs.readdirSync(dir)
             const allowedFiles = allFiles.filter(file => {
                 const absolutePath = path.resolve(dir, file)
                 const relativePath = path.relative(process.cwd(), absolutePath)
+
+                // If the parent (dir) was explicitly requested, we still want to filter
+                // its children by .gitignore unless the user wants everything.
+                // Usually, the expected behavior is: explicit path is allowed,
+                // but its contents follow standard rules.
                 return !gitIg.ignores(relativePath)
             })
 
@@ -134,8 +138,8 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
                 const absolutePath = path.resolve(filePath)
                 const relativePath = path.relative(process.cwd(), absolutePath)
 
-                const isItemIgnored = gitIg.ignores(relativePath)
-                if (isItemIgnored) return;
+                // Standard ignore check for children
+                if (gitIg.ignores(relativePath)) return;
 
                 const isLast = index === allowedFiles.length - 1
                 const connector = isLast ? '└── ' : '├── '
@@ -144,7 +148,8 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
 
                 if (fs.statSync(filePath).isDirectory()) {
                     const newPrefix = prefix + (isLast ? '    ' : '│   ')
-                    tree += generateTree(filePath, newPrefix)
+                    // Children are not explicit roots
+                    tree += generateTree(filePath, newPrefix, false)
                 }
             })
             return tree
@@ -152,17 +157,15 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
 
         // compressContent is imported from src/utils.js
 
-        const readPathAndWriteToFile = (itemPath) => {
+        const readPathAndWriteToFile = (itemPath, isExplicit = false) => {
             if (!fs.existsSync(itemPath)) return
 
             const absolutePath = path.resolve(itemPath)
             const relativePath = path.relative(process.cwd(), absolutePath)
-            // Fallback to basename if the file is strictly outside cwd scope (preventing crashes)
-            // If relativePath is '' it means itemPath IS the cwd (user passed '.' or no args).
-            // The ignore library throws on empty strings, and the root scan target should never be ignored anyway.
             const relativeCheckPath = relativePath.startsWith('..') ? path.basename(itemPath) : relativePath
 
-            if (relativeCheckPath && gitIg.ignores(relativeCheckPath)) {
+            // If NOT explicit and it's in .gitignore, skip
+            if (!isExplicit && relativeCheckPath && gitIg.ignores(relativeCheckPath)) {
                 return
             }
 
@@ -171,30 +174,25 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
             if (stat.isDirectory()) {
                 const files = fs.readdirSync(itemPath)
                 files.forEach(file => {
-                    readPathAndWriteToFile(path.join(itemPath, file))
+                    // Recursive calls for children are NOT explicit
+                    readPathAndWriteToFile(path.join(itemPath, file), false)
                 })
             } else if (stat.isFile()) {
-                if (contextIg.ignores(relativeCheckPath)) {
+                // If NOT explicit and it's in .contextignore, skip
+                if (!isExplicit && contextIg.ignores(relativeCheckPath)) {
                     return
                 } else {
                     const rawContent = fs.readFileSync(itemPath, 'utf8')
-                    // Use the relative path for the display string, but default to basename if it's completely out of bounds
                     const displayPath = relativePath.startsWith('..') ? itemPath : relativePath
                     const ext = path.extname(itemPath).slice(1) || 'text'
                     const content = compressContent(rawContent, ext, isCompress)
 
                     if (format === 'json') {
-                        jsonOutput.files.push({
-                            path: displayPath,
-                            content: content
-                        })
+                        jsonOutput.files.push({ path: displayPath, content: content })
                     } else if (format === 'md') {
-                        const outputContent = `### ${displayPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
-                        finalOutputString += outputContent
+                        finalOutputString += `### ${displayPath}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`
                     } else {
-                        // Plain text formatting
-                        const outputContent = `${displayPath}\n----------------------------------------\n${content}\n\n========================================\n\n`
-                        finalOutputString += outputContent
+                        finalOutputString += `${displayPath}\n----------------------------------------\n${content}\n\n========================================\n\n`
                     }
                 }
             }
@@ -206,7 +204,7 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
 
         // Step 1: Generate all file trees and output them first
         startPaths.forEach(p => {
-            const treeStructure = generateTree(p)
+            const treeStructure = generateTree(p, '', true)
             const rootName = p === '.' ? path.basename(process.cwd()) : path.basename(p)
 
             if (format === 'json') {
@@ -226,7 +224,7 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
         // Step 2: Append all file contents below the generated trees
         startPaths.forEach(p => {
             console.log(`Processing path: ${p}`)
-            readPathAndWriteToFile(p)
+            readPathAndWriteToFile(p, true)
         })
 
         // Step 3: Serialize JSON if needed

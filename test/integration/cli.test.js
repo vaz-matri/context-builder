@@ -153,3 +153,41 @@ describe('path argument', () => {
         expect(content).not.toContain('big-docs.txt')
     })
 })
+
+// ---------------------------------------------------------------------------
+// 8. Explicit path overrides (Bypassing ignore rules)
+// ---------------------------------------------------------------------------
+describe('explicit path overrides', () => {
+    it('includes a .gitignore-d file when specifically named in arguments', () => {
+        // .env is ignored in .gitignore, but we call it explicitly
+        runCLI(`.env -o "${TMP}" -n out-explicit-env.md`)
+        const content = fs.readFileSync(path.join(TMP, 'out-explicit-env.md'), 'utf8')
+
+        // It should contain the secret content because it was explicitly requested
+        expect(content).toContain('TOP_SECRET=password123')
+        expect(content).toContain('### .env')
+    })
+
+    it('includes a .contextignore-d file when specifically named in arguments', () => {
+        // big-docs.txt is content-ignored, but we call it explicitly
+        runCLI(`big-docs.txt -o "${TMP}" -n out-explicit-docs.md`)
+        const content = fs.readFileSync(path.join(TMP, 'out-explicit-docs.md'), 'utf8')
+
+        // The content should now be present
+        expect(content).toContain('This is a very large documentation file')
+        expect(content).toContain('### big-docs.txt')
+    })
+
+    it('still respects ignore rules for children when a directory is explicitly named', () => {
+        // We explicitly name the root fixture directory "."
+        // The children inside should still follow the ignore rules (unless they were also named)
+        runCLI(`. -o "${TMP}" -n out-explicit-dir.md`)
+        const content = fs.readFileSync(path.join(TMP, 'out-explicit-dir.md'), 'utf8')
+
+        // Root was explicit, but .env is a child and NOT explicit, so it should be hidden
+        expect(content).not.toContain('TOP_SECRET')
+
+        // big-docs.txt was a child and NOT explicit, so content should be hidden (only tree remains)
+        expect(content).not.toContain('very large documentation file')
+    })
+})

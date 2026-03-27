@@ -8,70 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.7] - wip
 
 ### Added
-- Unit and Integration test suites for core logic and CLI execution.
+- **Explicit Path Overrides**: Files and folders specifically passed as CLI arguments now bypass `.gitignore` and `.contextignore` rules, allowing users to force-include specific assets.
+- **Test Suite**: Added comprehensive unit and integration tests for core logic, CLI execution, and the new override feature.
 
 ### Changed
-- Refined the AI system prompt injected at the top of generated context files. Now uses structured markdown with explicit instructions for the LLM regarding data structure, exclusion rules, and handling of missing file contents.
+- **AI System Prompt**: Refined the prompt injected at the top of context files with structured markdown and explicit instructions for the LLM regarding data structure and exclusion rules.
+- **Traversal Logic**: Updated directory scanning to distinguish between top-level user-specified paths and recursively discovered sub-items to ensure ignore rules are only bypassed when intended.
+- **Test Assertions**: Improved integration test logic to prevent "false positive" failures caused by ignored filenames (like `.env`) appearing inside the text content of other files.
 
 ### Fixed
-- Fixed `TypeError: path must not be empty` crash when running `context-builder` on the current directory (`.`). The `ignore` check is now correctly skipped when `path.relative()` returns an empty string.
+- **CLI Crash**: Fixed `TypeError: path must not be empty` error occurring when running `context-builder` on the current directory (`.`).
 
 ## [0.2.2] - 2026-03-26
 
 ### Added
-- Support for parsing individual files in addition to directories.
+- **File Support**: Added support for parsing individual files in addition to directories.
 
 ## [0.2.1] - 2026-03-15
 
 ### Fixed
-- Resolved an issue with parsing multiple starting directories.
+- **Multi-path Parsing**: Resolved an issue where specifying multiple starting directories would not parse correctly.
 
 ## [0.2.0] - 2026-03-14
 
 ### Added
-- Ability to supply multiple root folders to scan (e.g., `context-builder src views`).
-- Support for `--out`, `-o` directory option (defaults to `.`).
-- Support for `--name`, `-n` filename option (defaults to `llm-context.md`).
-- Support for `--format`, `-f` output formats (`md`, `txt`, `json`).
-- Support for `--compress`, `-c` flag to strip comments and excess whitespace for token optimization.
-- Support for `--copy` flag to load the parsed codebase directly into the clipboard via `clipboardy`.
-- Support for `--version`, `-v` flag.
-- Added descriptive AI prompt mapping out codebase context, tool version, and omitted files info.
+- **Multi-path Input**: Ability to supply multiple root folders to scan (e.g., `context-builder src views`).
+- **CLI Options**: Added `--out` (directory), `--name` (filename), and `--format` (md, txt, json) for better output control.
+- **Token Optimization**: Added `--compress` flag to strip comments and excess whitespace to reduce context window usage.
+- **Clipboard Integration**: Support for `--copy` flag to load the parsed codebase directly into the clipboard via `clipboardy`.
+- **Context Metadata**: Added descriptive AI prompt mapping out codebase context, tool version, and omitted files info.
 
 ### Changed
-- **Breaking Change**: Default output file is now `llm-context.md` (previously `project-context.txt`).
-- Context-ignored files no longer appear in the detailed output section (they remain visible in the tree structure only).
-- Optimized output content and improved AI context clarity.
-- Updated `package.json` keywords for better discoverability.
+- **Breaking Change**: Default output file renamed to `llm-context.md` (previously `project-context.txt`).
+- **Exclusion Logic**: Context-ignored files no longer appear in the content section (visible in the tree structure only).
+- **Package Metadata**: Updated `package.json` keywords and descriptions for better NPM discoverability.
 
 ## [0.1.4] - 2025-12-19
 
 ### Added
-- Introduced `.contextignore` file support to manually exclude specific files and folders.
+- **Context Exclusions**: Introduced `.contextignore` file support to manually exclude specific files and folders from the content section.
 
 ### Changed
-- Updated `README.md` with detailed instructions on using `.contextignore`.
+- **Documentation**: Updated `README.md` with detailed instructions on using `.contextignore`.
 
 ## [0.1.3] - 2025-10-29
 
 ### Added
-- Initial `README.md` and `DeveloperGuide.md`.
+- **Documentation**: Initial `README.md` and `DeveloperGuide.md`.
 
 ## [0.1.2] - 2025-10-21
 
 ### Changed
-- Improved the release workflow to ensure a fresh build is generated before publishing.
+- **Release Workflow**: Improved the CI/CD workflow to ensure a fresh build is generated before publishing to NPM.
 
 ### Fixed
-- Fixed broken logo rendering on the NPM package page.
+- **Assets**: Fixed broken logo rendering on the NPM package page.
 
 ## [0.1.1] - 2025-10-01
 
 ### Changed
-- Renamed default output file to `project-context.txt`.
-- Optimized NPM package size by only publishing the `dist/` directory.
+- **Default Naming**: Renamed default output file to `project-context.txt`.
+- **NPM Optimization**: Reduced package size by only publishing the `dist/` directory and excluding source files.
 
 ## [0.1.0] - 2025-09-29
 
 ### Added
-- Initial release of the `context-builder` CLI tool.
+- **Initial Release**: Core logic for directory scanning, `.gitignore` support, and basic text output.
