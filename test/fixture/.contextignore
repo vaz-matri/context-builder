@@ -1,0 +1,2 @@
+# Exclude heavy docs from context content (still appears in tree)
+big-docs.txt

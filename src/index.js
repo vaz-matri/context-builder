@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import ignore from 'ignore'
 import { program } from 'commander'
+import { compressContent } from './utils.js'
 
 // Read package.json for version and metadata
 let pkgStr = '{}'
@@ -149,34 +150,7 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
             return tree
         }
 
-        const compressContent = (content, ext) => {
-            if (!isCompress) return content;
-
-            let compressed = content;
-
-            const cLikeExtensions =['js', 'jsx', 'ts', 'tsx', 'java', 'c', 'cpp', 'cs', 'go', 'php', 'swift', 'kt'];
-            const hashExtensions =['py', 'rb', 'yaml', 'yml', 'sh', 'pl', 'r'];
-            const htmlExtensions =['html', 'xml', 'vue', 'svelte', 'svg'];
-
-            if (cLikeExtensions.includes(ext)) {
-                // Remove multi-line comments
-                compressed = compressed.replace(/\/\*[\s\S]*?\*\//g, '');
-                // Remove single-line comments safely
-                compressed = compressed.replace(/(^\s*|\s+)\/\/.*$/gm, '');
-            } else if (hashExtensions.includes(ext)) {
-                // Remove Python/Ruby style comments #
-                compressed = compressed.replace(/(^\s*|\s+)#.*$/gm, '');
-            } else if (htmlExtensions.includes(ext)) {
-                // Remove HTML comments <!-- -->
-                compressed = compressed.replace(/<!--[\s\S]*?-->/g, '');
-            }
-
-            // Remove excessive blank lines for all files
-            compressed = compressed.replace(/\n\s*\n/g, '\n');
-
-            // Trim leading/trailing whitespace
-            return compressed.trim();
-        }
+        // compressContent is imported from src/utils.js
 
         const readPathAndWriteToFile = (itemPath) => {
             if (!fs.existsSync(itemPath)) return
@@ -207,7 +181,7 @@ You are an expert AI developer assistant. Your task is to analyze the provided c
                     // Use the relative path for the display string, but default to basename if it's completely out of bounds
                     const displayPath = relativePath.startsWith('..') ? itemPath : relativePath
                     const ext = path.extname(itemPath).slice(1) || 'text'
-                    const content = compressContent(rawContent, ext)
+                    const content = compressContent(rawContent, ext, isCompress)
 
                     if (format === 'json') {
                         jsonOutput.files.push({

@@ -1,0 +1,2 @@
+This is a very large documentation file that should appear in the tree but not in the content section.
+It is excluded via .contextignore.

@@ -8,10 +8,12 @@
   },
   "scripts": {
     "dev": "vite-node src/index.js",
-    "dev:link": "npm link",
-    "dev:unlink": "npm unlink -g @json-express/context-builder",
+    "link": "pnpm link --global",
+    "unlink": "pnpm rm --global @json-express/context-builder",
     "build": "vite build",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -36,7 +38,8 @@
   },
   "devDependencies": {
     "vite": "^7.1.7",
-    "vite-node": "^3.2.4"
+    "vite-node": "^3.2.4",
+    "vitest": "^4.1.2"
   },
   "files": [
     "dist"
