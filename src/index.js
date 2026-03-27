@@ -174,9 +174,11 @@ If you need to see the contents of any files listed in the tree that are omitted
             const absolutePath = path.resolve(itemPath)
             const relativePath = path.relative(process.cwd(), absolutePath)
             // Fallback to basename if the file is strictly outside cwd scope (preventing crashes)
+            // If relativePath is '' it means itemPath IS the cwd (user passed '.' or no args).
+            // The ignore library throws on empty strings, and the root scan target should never be ignored anyway.
             const relativeCheckPath = relativePath.startsWith('..') ? path.basename(itemPath) : relativePath
 
-            if (gitIg.ignores(relativeCheckPath)) {
+            if (relativeCheckPath && gitIg.ignores(relativeCheckPath)) {
                 return
             }
 

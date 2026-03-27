@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - wip
+
+### Fixed
+- Fixed `TypeError: path must not be empty` crash when running `context-builder` or `context-builder .` (i.e. scanning the current directory). The `ignore` library throws on empty strings; when the scan root is the cwd itself, `path.relative()` returns `""` and the ignore check is now correctly skipped.
+
 ## [0.2.2] - 2026-03-26
 
 ### Added
