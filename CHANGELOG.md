@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.8] - wip
 
+### Changed
+- **Documentation**: Updated `README.md`
+
 ## [0.2.7] - 2026-03-28
 
 ### Added

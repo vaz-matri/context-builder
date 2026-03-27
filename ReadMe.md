@@ -1,85 +1,97 @@
 # <img src="logo/logo_long_desc_bg_white.svg" alt="CONTEXT Builder">
 
+[![Version](https://img.shields.io/badge/version-0.2.7--alpha-blue)](https://github.com/your-repo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## What is CONTEXT Builder?
 
-CONTEXT Builder is a CLI tool that helps developers prepare their codebase as context for AI assistants. When working with AI-powered IDEs or co-pilots, your code needs to be formatted properly to be understood by AI tools. However, if you prefer to stick with your favorite code editor rather than switching to an AI-powered IDE, preparing this context manually can be tedious and time-consuming.
+**CONTEXT Builder** is a CLI utility that parses your codebase directory and compresses it into a single, high-density artifact optimized for **LLM (Large Language Model) digestion**.
 
-CONTEXT Builder solves this problem by automatically converting your codebase into a format that's optimized for AI consumption. Once prepared, you can easily upload this context to your favorite AI tool (like ChatGPT, Claude, or others) and start asking questions about your code, getting suggestions, or debugging issues—all without leaving your preferred development environment.
+If you prefer your own IDE (VS Code, Vim, Sublime) over AI-native editors but still want the power of Claude or ChatGPT, this tool is for you. It instantly generates a context file containing your project's structure and code, which you can simply upload or paste into any AI chat.
+
+### Why use it?
+- **Token Efficiency**: Aggressively strips comments and whitespace with the `--compress` flag.
+- **Smart Filtering**: Automatically honors `.gitignore` and supports a custom `.contextignore`.
+- **AI-Ready**: Injects a structured system prompt at the top of every file to help the AI understand exactly how to assist you.
+- **Clipboard First**: By default, it copies your context to the clipboard for instant pasting.
+
+---
 
 ## Installation
 
-Install CONTEXT Builder globally using pnpm:
+Install globally using **pnpm** (preferred) or npm:
 
 ```bash
-pnpm i -g @json-express/context-builder
+pnpm add -g @json-express/context-builder
+# OR
+npm install -g @json-express/context-builder
 ```
+
+---
 
 ## Usage
 
-Navigate to your project directory and run the tool. By default, it will process the current directory and output to `llm-context.md`.
+Navigate to your project directory and run the tool. By default, it processes the current directory, generates `llm-context.md`, and copies the content to your clipboard.
 
 ```bash
-cd project-dir
 context-builder
 ```
 
-### Specifying Directories
-
-You can specify one or more directories to include in the context by passing them as arguments:
+### Files & Directories
+You can specify one or more **directories or individual files** as arguments:
 
 ```bash
-context-builder src views components
+# Mix and match folders and specific files
+context-builder src/components README.md package.json
 ```
 
 ### Options
 
-- `-o, --out <directory>`: Specify the output directory (defaults to current folder `.`)
-- `-n, --name <filename>`: Specify the output filename (defaults to `llm-context.md`)
-- `-f, --format <format>`: Specify the output file format (`md`, `txt`, `json` - defaults to `md`)
-- `-c, --compress`: Compress output to save LLM tokens by removing whitespace and comments
-- `--copy`: **[NEW]** Skip generating the file and only copy the context string to your clipboard (Note: Without this flag, generating the file will *also* copy the content natively)
-- `-v, --version`: Output the current version
-- `-h, --help`: Display help for command
+| Flag | Description |
+| :--- | :--- |
+| `-o, --out <dir>` | Output directory (defaults to `.`) |
+| `-n, --name <file>`| Output filename (defaults to `llm-context.md`) |
+| `-f, --format <fmt>`| Output format: `md`, `txt`, or `json` (defaults to `md`) |
+| `-c, --compress`   | **Token Saver**: Strips comments and excess whitespace |
+| `--copy`           | **Clipboard Only**: Skips file generation and only copies to clipboard |
+| `-v, --version`    | Output version |
+| `-h, --help`       | Display help |
 
-**Example:** Generate a `.txt` context from the `src` folder, compress it, and save it to `dist/my-context.txt`:
+### Examples
 
+**1. Compress and save to a specific folder:**
 ```bash
-context-builder src -o dist -n my-context.txt -f txt -c
-```
-**Example:** Build context from the `views` folder and ONLY copy it to the clipboard (no file output):
-
-```bash
-context-builder views --copy
+context-builder src -o ./dist -n context.txt -f txt -c
 ```
 
-The tool will process your codebase and generate the context file that you can upload to your AI assistant.
+**2. Direct-to-Clipboard (No file created):**
+Ideal for small features where you just want to "grab and go" to ChatGPT.
+```bash
+context-builder src/utils/helper.js --copy
+```
+
+---
 
 ## Ignoring Files
 
-By default, CONTEXT Builder automatically respects your `.gitignore` file. Any files or folders ignored by Git will not be included in the generated context.
+### Automatic `.gitignore`
+CONTEXT Builder automatically detects and respects your `.gitignore`. Files like `node_modules`, build artifacts, and secrets are excluded by default.
 
-### Using `.contextignore`
+### Custom `.contextignore`
+Sometimes you want a file in Git, but it's too big for an AI's memory (like a `pnpm-lock.yaml` or large SVGs). Create a `.contextignore` file in your root using standard glob patterns:
 
-Sometimes, you might want to keep certain files in your Git repository but exclude them from the AI context (for example: large documentation files, lock files, or asset metadata that might consume too many tokens).
-
-You can create a `.contextignore` file in your root directory. This file uses the **same pattern syntax as `.gitignore`**.
-
-**Example `.contextignore`:**
 ```text
-# Exclude heavy documentation
-/docs/legacy-manuals/
-
-# Exclude specific files
-package-lock.json
+# Keep in Git, but hide from AI
 pnpm-lock.yaml
-
-# Exclude all .svg files from context
-**/*.svg
+**/assets/*.svg
+docs/legacy/
 ```
 
-## Uninstallation
+> **Note**: Files ignored via `.contextignore` will still appear in the **Project Tree** (so the AI knows they exist), but their **content** will be omitted to save tokens.
 
-To remove CONTEXT Builder from your system:
+---
+
+## Uninstallation
 
 ```bash
 pnpm uninstall -g @json-express/context-builder
